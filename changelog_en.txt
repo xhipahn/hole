@@ -1,0 +1,732 @@
+Please consider a donation.
+
+== 11.01.2020 ==
+
+fix freeze on sample loading
+
+== 08.01.2020 ==
+
+fixes and optimizations in sample generators
+
+fixed Quick96 and removed lr_dropout from SAEHD for OpenCL build.
+
+CUDA build now works on lower-end GPU with 2GB VRAM:
+GTX 880M GTX 870M GTX 860M GTX 780M GTX 770M
+GTX 765M GTX 760M GTX 680MX GTX 680M GTX 675MX GTX 670MX 
+GTX 660M GT 755M GT 750M GT 650M GT 745M GT 645M GT 740M 
+GT 730M GT 640M GT 735M GT 730M GTX 770 GTX 760 GTX 750 Ti 
+GTX 750 GTX 690 GTX 680 GTX 670 GTX 660 Ti GTX 660 GTX 650 Ti GTX 650 GT 740
+
+== 29.12.2019 ==
+
+fix faceset enhancer for faces that contain edited mask
+
+fix long load when using various gpus in the same DFL folder
+
+fix extract unaligned faces 
+
+avatar: avatar_type is now only head by default
+
+== 28.12.2019 ==
+
+FacesetEnhancer now asks to merge aligned_enhanced/ to aligned/
+
+fix 0 faces detected in manual extractor
+
+Quick96, SAEHD: optimized architecture. You have to restart training.
+
+Now there are only two builds: CUDA (based on 9.2) and Opencl.
+
+== 26.12.2019 ==
+
+fixed mask editor
+
+added FacesetEnhancer
+4.2.other) data_src util faceset enhance best GPU.bat
+4.2.other) data_src util faceset enhance multi GPU.bat
+
+FacesetEnhancer greatly increases details in your source face set,
+same as Gigapixel enhancer, but in fully automatic mode.
+In OpenCL build works on CPU only.
+
+before/after https://i.imgur.com/TAMoVs6.png
+
+== 23.12.2019 ==
+
+Extractor: 2nd pass now faster on frames where faces are not found
+
+all models: removed options 'src_scale_mod', and 'sort samples by yaw as target'
+If you want, you can manually remove unnecessary angles from src faceset after sort by yaw.
+
+Optimized sample generators (CPU workers). Now they consume less amount of RAM and work faster.
+
+added 
+4.2.other) data_src/dst util faceset pack.bat
+	Packs /aligned/ samples into one /aligned/samples.pak file.
+	After that, all faces will be deleted.
+
+4.2.other) data_src/dst util faceset unpack.bat
+	unpacks faces from /aligned/samples.pak to /aligned/ dir.
+	After that, samples.pak will be deleted.
+
+Packed faceset load and work faster.
+
+
+== 20.12.2019 ==
+
+fix 3rd pass of extractor for some systems
+
+More stable and precise version of the face transformation matrix
+
+SAEHD: lr_dropout now as an option, and disabled by default
+When the face is trained enough, you can enable this option to get extra sharpness for less amount of iterations
+
+
+added
+4.2.other) data_src util faceset metadata save.bat
+	saves metadata of data_src\aligned\ faces into data_src\aligned\meta.dat
+
+4.2.other) data_src util faceset metadata restore.bat
+	restore metadata from 'meta.dat' to images
+	if image size different from original, then it will be automatically resized
+
+You can greatly enhance face details of src faceset by using Topaz Gigapixel software.
+example before/after https://i.imgur.com/Gwee99L.jpg
+Download it from torrent https://rutracker.org/forum/viewtopic.php?t=5757118
+Example of workflow:
+
+1) run 'data_src util faceset metadata save.bat'
+2) launch Topaz Gigapixel
+3) open 'data_src\aligned\' and select all images
+4) set output folder to 'data_src\aligned_topaz' (create folder in save dialog)
+5) set settings as on screenshot https://i.imgur.com/kAVWMQG.jpg
+	you can choose 2x, 4x, or 6x upscale rate
+6) start process images and wait full process
+7) rename folders:
+	data_src\aligned        ->  data_src\aligned_original
+	data_src\aligned_topaz  ->  data_src\aligned
+8) copy 'data_src\aligned_original\meta.dat' to 'data_src\aligned\'
+9) run 'data_src util faceset metadata restore.bat'
+	images will be downscaled back to original size (256x256) preserving details
+	metadata will be restored
+10) now your new enhanced faceset is ready to use !
+
+
+
+
+
+== 15.12.2019 ==
+
+SAEHD,Quick96:
+improved model generalization, overall accuracy and sharpness 
+by using new 'Learning rate dropout' technique from the paper https://arxiv.org/abs/1912.00144
+An example of a loss histogram where this function is enabled after the red arrow:
+https://i.imgur.com/3olskOd.jpg
+
+
+== 12.12.2019 ==
+
+removed FacesetRelighter due to low quality of the result 
+
+added sort by absdiff
+This is sort method by absolute per pixel difference between all faces.
+options:
+Sort by similar? ( y/n ?:help skip:y ) :
+if you choose 'n', then most dissimilar faces will be placed first.
+
+'sort by final' renamed to 'sort by best'
+
+OpenCL: fix extractor for some amd cards
+
+== 14.11.2019 ==
+
+Converter: added new color transfer mode: mix-m
+
+== 13.11.2019 ==
+
+SAE,SAEHD,Converter:
+added sot-m color transfer
+
+Converter:
+removed seamless2 mode
+
+FacesetRelighter:
+Added intensity parameter to the manual picker.
+'One random direction' and 'predefined 7 directions' use random intensity from 0.3 to 0.6.
+
+== 12.11.2019 ==
+
+FacesetRelighter fixes and improvements:
+
+now you have 3 ways:
+1) define light directions manually (not for google colab)
+   watch demo https://youtu.be/79xz7yEO5Jw
+2) relight faceset with one random direction
+3) relight faceset with predefined 7 directions
+
+== 11.11.2019 ==
+
+added FacesetRelighter:
+Synthesize new faces from existing ones by relighting them using DeepPortraitRelighter network.
+With the relighted faces neural network will better reproduce face shadows.
+
+Therefore you can synthsize shadowed faces from fully lit faceset.
+https://i.imgur.com/wxcmQoi.jpg
+
+as a result, better fakes on dark faces:
+https://i.imgur.com/5xXIbz5.jpg
+
+operate via
+data_x add relighted faces.bat
+data_x delete relighted faces.bat
+
+in OpenCL build Relighter runs on CPU
+
+== 09.11.2019 ==
+
+extractor: removed "increased speed of S3FD" for compatibility reasons
+
+converter: 
+fixed crashes
+removed useless 'ebs' color transfer
+changed keys for color degrade
+
+added image degrade via denoise - same as denoise extracted data_dst.bat , 
+but you can control this option directly in the interactive converter
+
+added image degrade via bicubic downscale/upscale 
+
+SAEHD: 
+default ae_dims for df now 256. It is safe to train SAEHD on 256 ae_dims and higher resolution.
+Example of recent fake: https://youtu.be/_lxOGLj-MC8
+
+added Quick96 model.
+This is the fastest model for low-end 2GB+ NVidia and 4GB+ AMD cards. 
+Model has zero options and trains a 96pix fullface.
+It is good for quick deepfake demo.
+Example of the preview trained in 15 minutes on RTX2080Ti:
+https://i.imgur.com/oRMvZFP.jpg
+
+== 27.10.2019 ==
+
+Extractor: fix for AMD cards
+
+== 26.10.2019 ==
+
+red square of face alignment now contains the arrow that shows the up direction of an image
+
+fix alignment of side faces
+Before https://i.imgur.com/pEoZ6Mu.mp4
+after https://i.imgur.com/wO2Guo7.mp4
+
+fix message when no training data provided
+
+== 23.10.2019 ==
+
+enhanced sort by final: now faces are evenly distributed not only in the direction of yaw, 
+but also in pitch
+
+added 'sort by vggface': sorting by face similarity using VGGFace model. 
+Requires 4GB+ VRAM and internet connection for the first run.
+
+
+== 19.10.2019 ==
+
+fix extractor bug for 11GB+ cards
+
+== 15.10.2019 ==
+
+removed fix "fixed bug when the same face could be detected twice"
+
+SAE/SAEHD:
+removed option 'apply random ct'
+
+added option 
+   Color transfer mode apply to src faceset. ( none/rct/lct/mkl/idt, ?:help skip: none )
+   Change color distribution of src samples close to dst samples. Try all modes to find the best.
+before was lct mode, but sometime it does not work properly for some facesets.
+
+
+== 14.10.2019 ==
+
+fixed bug when the same face could be detected twice
+
+Extractor now produces a less shaked face. but second pass is now slower by 25%
+before/after: https://imgur.com/L77puLH
+
+SAE, SAEHD: 'random flip' and 'learn mask' options now can be overridden.
+It is recommended to start training for first 20k iters always with 'learn_mask'
+
+SAEHD: added option Enable random warp of samples, default is on
+Random warp is required to generalize facial expressions of both faces. 
+When the face is trained enough, you can disable it to get extra sharpness for less amount of iterations.
+
+== 10.10.2019 ==
+
+fixed wrong NVIDIA GPU detection in extraction and training processes
+
+increased speed of S3FD 1st pass extraction for GPU with >= 11GB vram.
+
+== 09.10.2019 ==
+
+fixed wrong NVIDIA GPU indexes in a systems with two or more GPU
+fixed wrong NVIDIA GPU detection on the laptops
+
+removed TrueFace model.
+
+added SAEHD model ( High Definition Styled AutoEncoder )
+Compare with SAE: https://i.imgur.com/3QJAHj7.jpg
+This is a new heavyweight model for high-end cards to achieve maximum possible deepfake quality in 2020.
+
+Differences from SAE:
++ new encoder produces more stable face and less scale jitter
++ new decoder produces subpixel clear result
++ pixel loss and dssim loss are merged together to achieve both training speed and pixel trueness
++ by default networks will be initialized with CA weights, but only after first successful iteration
+  therefore you can test network size and batch size before weights initialization process
++ new neural network optimizer consumes less VRAM than before
++ added option <Enable 'true face' training>
+  The result face will be more like src and will get extra sharpness.
+  Enable it for last 30k iterations before conversion.
++ encoder and decoder dims are merged to one parameter encoder/decoder dims
++ added mid-full face, which covers 30% more area than half face.  
+
+example of the preview trained on RTX2080TI, 128 resolution, 512-21 dims, 8 batch size, 700ms per iteration:
+without trueface            : https://i.imgur.com/MPPKWil.jpg
+with trueface    +23k iters : https://i.imgur.com/dV5Ofo9.jpg
+
+== 24.09.2019 ==
+
+fix TrueFace model, required retraining
+
+== 21.09.2019 ==
+
+fix avatar model
+
+== 19.09.2019 ==
+
+SAE : WARNING, RETRAIN IS REQUIRED ! 
+fixed model sizes from previous update. 
+avoided bug in ML framework(keras) that forces to train the model on random noise.
+
+Converter: added blur on the same keys as sharpness
+
+Added new model 'TrueFace'. Only for NVIDIA cards.
+This is a GAN model ported from https://github.com/NVlabs/FUNIT
+Model produces near zero morphing and high detail face.
+Model has higher failure rate than other models.
+It does not learn the mask, so fan-x mask modes should be used in the converter.
+Keep src and dst faceset in same lighting conditions. 
+
+== 13.09.2019 ==
+
+Converter: added new color transfer modes: mkl, mkl-m, idt, idt-m
+
+SAE: removed multiscale decoder, because it's not effective
+
+== 07.09.2019 ==
+
+Extractor: fixed bug with grayscale images.
+
+Converter:
+
+Session is now saved to the model folder.
+
+blur and erode ranges are increased to -400+400
+
+hist-match-bw is now replaced with seamless2 mode.
+
+Added 'ebs' color transfer mode (works only on Windows).
+
+FANSEG model (used in FAN-x mask modes) is retrained with new model configuration
+and now produces better precision and less jitter
+
+== 30.08.2019 ==
+
+interactive converter now saves the session.
+if input frames are changed (amount or filenames)
+then interactive converter automatically starts a new session.
+if model is more trained then all frames will be recomputed again with their saved configs.
+
+== 28.08.2019 ==
+
+removed landmarks of lips which are used in face aligning
+result is less scale jittering
+before  https://i.imgur.com/gJaW5Y4.gifv 
+after   https://i.imgur.com/Vq7gvhY.gifv
+
+converter: fixed merged\ filenames, now they are 100% same as input from data_dst\
+
+converted to X.bat : now properly eats any filenames from merged\ dir as input
+
+== 27.08.2019 ==
+
+fixed converter navigation logic and output filenames in merge folder
+
+added EbSynth program. It is located in _internal\EbSynth\ folder
+Start it via 10) EbSynth.bat
+It starts with sample project loaded from _internal\EbSynth\SampleProject
+EbSynth is mainly used to create painted video, but with EbSynth you can fix some weird frames produced by deepfake process.
+before: https://i.imgur.com/9xnLAL4.gifv 
+after:  https://i.imgur.com/f0Lbiwf.gifv
+official tutorial for EbSynth : https://www.youtube.com/watch?v=0RLtHuu5jV4
+
+== 26.08.2019 ==
+
+updated pdf manuals for AVATAR model.
+
+Avatar converter: added super resolution option.
+
+All converters:
+fixes and optimizations
+super resolution DCSCN network is now replaced by RankSRGAN
+added new option sharpen_mode and sharpen_amount
+
+== 25.08.2019 ==
+
+Converter: FAN-dst mask mode now works for half face models.
+
+AVATAR Model: default avatar_type option on first startup is now HEAD. 
+Head produces much more stable result than source.
+
+updated usage of AVATAR model:
+Usage:
+1) place data_src.mp4 10-20min square resolution video of news reporter sitting at the table with static background,
+   other faces should not appear in frames.
+2) process "extract images from video data_src.bat" with FULL fps
+3) place data_dst.mp4 square resolution video of face who will control the src face
+4) process "extract images from video data_dst FULL FPS.bat"
+5) process "data_src mark faces S3FD best GPU.bat"
+6) process "data_dst extract unaligned faces S3FD best GPU.bat"
+7) train AVATAR.bat stage 1, tune batch size to maximum for your card (32 for 6GB), train to 50k+ iters.
+8) train AVATAR.bat stage 2, tune batch size to maximum for your card (4 for 6GB), train to decent sharpness.
+9) convert AVATAR.bat
+10) converted to mp4.bat
+
+== 24.08.2019 ==
+
+Added interactive converter.
+With interactive converter you can change any parameter of any frame and see the result in real time.
+
+Converter: added motion_blur_power param. 
+Motion blur is applied by precomputed motion vectors. 
+So the moving face will look more realistic.
+
+RecycleGAN model is removed.
+
+Added experimental AVATAR model. Minimum required VRAM is 6GB for NVIDIA and 12GB for AMD.
+
+
+== 16.08.2019 ==
+
+fixed error "Failed to get convolution algorithm" on some systems
+fixed error "dll load failed" on some systems
+
+model summary is now better formatted
+
+Expanded eyebrows line of face masks. It does not affect mask of FAN-x converter mode.
+ConverterMasked: added mask gradient of bottom area, same as side gradient
+
+== 23.07.2019 ==
+
+OpenCL : update versions of internal libraries
+
+== 20.06.2019 ==
+
+Trainer: added option for all models
+Enable autobackup? (y/n ?:help skip:%s) : 
+Autobackup model files with preview every hour for last 15 hours. Latest backup located in model/<>_autobackups/01
+
+SAE: added option only for CUDA builds:
+Enable gradient clipping? (y/n, ?:help skip:%s) : 
+Gradient clipping reduces chance of model collapse, sacrificing speed of training.
+
+== 02.06.2019 ==
+
+fix error on typing uppercase values
+
+== 24.05.2019 ==
+
+OpenCL : fix FAN-x converter
+
+== 20.05.2019 ==
+
+OpenCL : fixed bug when analysing ops was repeated after each save of the model
+
+== 10.05.2019 ==
+
+fixed work of model pretraining
+
+== 08.05.2019 ==
+
+SAE: added new option 
+Apply random color transfer to src faceset? (y/n, ?:help skip:%s) : 
+Increase variativity of src samples by apply LCT color transfer from random dst samples.
+It is like 'face_style' learning, but more precise color transfer and without risk of model collapse, 
+also it does not require additional GPU resources, but the training time may be longer, due to the src faceset is becoming more diverse.
+
+== 05.05.2019 ==
+
+OpenCL: SAE model now works properly
+
+== 05.03.2019 ==
+
+fixes
+
+SAE: additional info in help for options:
+
+Use pixel loss - Enabling this option too early increases the chance of model collapse.
+Face style power - Enabling this option increases the chance of model collapse.
+Background style power - Enabling this option increases the chance of model collapse.
+
+
+== 05.01.2019 == 
+
+SAE: added option 'Pretrain the model?'
+
+Pretrain the model with large amount of various faces. 
+This technique may help to train the fake with overly different face shapes and light conditions of src/dst data. 
+Face will be look more like a morphed. To reduce the morph effect, 
+some model files will be initialized but not be updated after pretrain: LIAE: inter_AB.h5 DF: encoder.h5. 
+The longer you pretrain the model the more morphed face will look. After that, save and run the training again.
+
+
+== 04.28.2019 ==
+
+fix 3rd pass extractor hang on AMD 8+ core processors
+
+Converter: fixed error with degrade color after applying 'lct' color transfer
+
+added option at first run for all models: Choose image for the preview history? (y/n skip:n)
+Controls: [p] - next, [enter] - confirm.
+
+fixed error with option sort by yaw. Remember, do not use sort by yaw if the dst face has hair that covers the jaw.
+
+== 04.24.2019 ==
+
+SAE: finally the collapses were fixed
+
+added option 'Use CA weights? (y/n, ?:help skip: %s ) : 
+Initialize network with 'Convolution Aware' weights from paper https://arxiv.org/abs/1702.06295.
+This may help to achieve a higher accuracy model, but consumes a time at first run.
+
+== 04.23.2019 ==
+
+SAE: training should be restarted
+remove option 'Remove gray border' because it makes the model very resource intensive.
+
+== 04.21.2019 ==
+
+SAE: 
+fix multiscale decoder.
+training with liae archi should be restarted
+
+changed help for 'sort by yaw' option:
+NN will not learn src face directions that don't match dst face directions. Do not use if the dst face has hair that covers the jaw.
+
+
+== 04.20.2019 ==
+
+fixed work with NVIDIA cards in TCC mode
+
+Converter: improved FAN-x masking mode.
+Now it excludes face obstructions such as hair, fingers, glasses, microphones, etc.
+example https://i.imgur.com/x4qroPp.gifv
+It works only for full face models, because there were glitches in half face version.
+
+Fanseg is trained by using manually refined by MaskEditor >3000 various faces with obstructions.
+Accuracy of fanseg to handle complex obstructions can be improved by adding more samples to dataset, but I have no time for that :(
+Dataset is located in the official mega.nz folder.
+If your fake has some complex obstructions that incorrectly recognized by fanseg,
+you can add manually masked samples from your fake to the dataset
+and retrain it by using --model DEV_FANSEG argument in bat file. Read more info in dataset archive.
+Minimum recommended VRAM is 6GB and batch size 24 to train fanseg.
+Result model\FANSeg_256_full_face.h5 should be placed to DeepFacelab\facelib\ folder
+
+Google Colab now works on Tesla T4 16GB.
+With Google Colaboratory you can freely train your model for 12 hours per session, then reset session and continue with last save.
+more info how to work with Colab: https://github.com/chervonij/DFL-Colab
+
+== 04.07.2019 == 
+
+Extractor: added warning if aligned folder contains files that will be deleted.
+
+Converter subprocesses limited to maximum 6
+
+== 04.06.2019 ==
+
+added experimental mask editor. 
+It is created to improve FANSeg model, but you can try to use it in fakes.
+But remember: it does not guarantee quality improvement.
+usage:
+run 5.4) data_dst mask editor.bat
+edit the mask of dst faces with obstructions
+train SAE either with 'learn mask' or with 'style values'
+Screenshot of mask editor: https://i.imgur.com/SaVpxVn.jpg
+result of training and merging using edited mask: https://i.imgur.com/QJi9Myd.jpg
+Complex masks are harder to train.
+
+SAE: 
+previous SAE model will not work with this update.
+Greatly decreased chance of model collapse. 
+Increased model accuracy.
+Residual blocks now default and this option has been removed.
+Improved 'learn mask'.
+Added masked preview (switch by space key)
+
+Converter: 
+fixed rct/lct in seamless mode
+added mask mode (6) learned*FAN-prd*FAN-dst
+
+changed help message for pixel loss:
+Pixel loss may help to enhance fine details and stabilize face color. Use it only if quality does not improve over time.
+
+fixed ctrl-c exit in no-preview mode
+
+== 03.31.2019 ==
+
+Converter: fix blur region of seamless.
+
+== 03.30.2019 == 
+
+fixed seamless face jitter
+removed options Suppress seamless jitter, seamless erode mask modifier.
+seamlessed face now properly uses blur modifier
+added option 'FAN-prd&dst' - using multiplied FAN prd and dst mask,
+
+== 03.29.2019 ==
+
+Converter: refactorings and optimizations
+added new option
+Apply super resolution? (y/n skip:n) : Enhance details by applying DCSCN network.
+before/after gif - https://i.imgur.com/jJA71Vy.gif
+
+== 03.26.2019 ==
+
+SAE: removed lightweight encoder.
+optimizer mode now can be overriden each run
+
+Trainer: the loss line now shows the average loss values after saving
+
+Converter: fixed bug with copying files without faces.
+
+XNViewMP : updated version
+
+fixed cut video.bat for paths with spaces
+
+== 03.24.2019 ==
+
+old SAE model will not work with this update.
+
+Fixed bug when SAE can be collapsed during a time. 
+
+SAE: removed CA weights and encoder/decoder dims.
+
+added new options:
+
+Encoder dims per channel (21-85 ?:help skip:%d) 
+More encoder dims help to recognize more facial features, but require more VRAM. You can fine-tune model size to fit your GPU.
+
+Decoder dims per channel (11-85 ?:help skip:%d) 
+More decoder dims help to get better details, but require more VRAM. You can fine-tune model size to fit your GPU.
+
+Add residual blocks to decoder? (y/n, ?:help skip:n) : 
+These blocks help to get better details, but require more computing time.
+
+Remove gray border? (y/n, ?:help skip:n) : 
+Removes gray border of predicted face, but requires more computing resources.
+
+
+Extract images from video: added option
+Output image format? ( jpg png ?:help skip:png ) : 
+PNG is lossless, but produces images with size x10 larger than JPG.
+JPG extraction is faster, especially on HDD instead of SSD.
+
+== 03.21.2019 ==
+
+OpenCL build: fixed, now works on most video cards again.
+
+old SAE model will not work with this update.
+Fixed bug when SAE can be collapsed during a time
+
+Added option
+Use CA weights? (y/n, ?:help skip: n ) :
+Initialize network with 'Convolution Aware' weights. 
+This may help to achieve a higher accuracy model, but consumes time at first run.
+
+Extractor:
+removed DLIB extractor
+greatly increased accuracy of landmarks extraction, especially with S3FD detector, but speed of 2nd pass now slower.
+From this point on, it is recommended to use only the S3FD detector.
+before https://i.imgur.com/SPGeJCm.gif
+after https://i.imgur.com/VmmAm8p.gif
+
+Converter: added new option to choose type of mask for full-face models.
+
+Mask mode: (1) learned, (2) dst, (3) FAN-prd, (4) FAN-dst (?) help. Default - 1 : 
+Learned – Learned mask, if you choose option 'Learn mask' in model. The contours are fairly smooth, but can be wobbly.
+Dst – raw mask from dst face, wobbly contours.
+FAN-prd – mask from pretrained FAN model from predicted face. Very smooth not shaky countours.
+FAN-dst – mask from pretrained FAN model from dst face. Very smooth not shaky countours.
+Advantages of FAN mask: you can get a not wobbly shaky without learning it by model.
+Disadvantage of FAN mask: may produce artifacts on the contours if the face is obstructed.
+
+== 03.13.2019 ==
+
+SAE: added new option
+
+Optimizer mode? ( 1,2,3 ?:help skip:1) : 
+this option only for NVIDIA cards. Optimizer mode of neural network.
+1 - default.
+2 - allows you to train x2 bigger network, uses a lot of RAM.
+3 - allows you to train x3 bigger network, uses huge amount of RAM and 30% slower.
+
+Epoch term renamed to iteration term.
+
+added showing timestamp in string of training in console
+
+== 03.11.2019 ==
+
+CUDA10.1AVX users - update your video drivers from geforce.com site
+
+face extractor:
+
+added new extractor S3FD - more precise, produces less false-positive faces, accelerated by AMD/IntelHD GPU (while MT is not)
+
+speed of 1st pass with DLIB significantly increased
+
+decreased amount of false-positive faces for all extractors
+
+manual extractor: added 'h' button to hide the help information
+
+fix DFL conflict with system python installation
+
+removed unwanted tensorflow info from console log
+
+updated manual_ru
+
+== 03.07.2019 ==
+
+fixes
+
+upgrade to python 3.6.8
+
+Reorganized structure of DFL folder. Removed unnecessary files and other trash.
+
+Current available builds now:
+
+DeepFaceLabCUDA9.2SSE - for NVIDIA cards up to GTX10x0 series and any 64-bit CPU
+DeepFaceLabCUDA10.1AVX - for NVIDIA cards up to RTX and CPU with AVX instructions support
+DeepFaceLabOpenCLSSE - for AMD/IntelHD cards and any 64-bit CPU
+
+== 03.04.2019 == 
+
+added
+4.2.other) data_src util recover original filename.bat
+5.3.other) data_dst util recover original filename.bat
+
+== 03.03.2019 ==
+
+Convertor: fix seamless
+
+== for older changelog see github page ==
